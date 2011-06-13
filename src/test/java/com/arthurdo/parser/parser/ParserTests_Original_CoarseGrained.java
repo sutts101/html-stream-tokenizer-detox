@@ -9,7 +9,7 @@ import com.arthurdo.parser.*;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class ParserTest
+public class ParserTests_Original_CoarseGrained
 {
     @Test
     public void test4() {
@@ -141,9 +141,9 @@ public class ParserTest
 
     private static String tokenizeAndCollect(String html) {
         try {
-            Reader in = new StringReader(html);
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
             PrintStream out = new PrintStream(buffer);
+            Reader in = new StringReader(html);
             HtmlStreamTokenizer tok = new HtmlStreamTokenizer(in);
             HtmlTag tag = new HtmlTag();
             while (tok.nextToken() != HtmlStreamTokenizer.TT_EOF)
