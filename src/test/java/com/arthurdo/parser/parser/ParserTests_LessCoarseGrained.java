@@ -30,7 +30,7 @@ public class ParserTests_LessCoarseGrained {
     @Test
     public void shouldHandleSimpleParagraph() throws IOException {
         String html = "<p>Hallo world</p>";
-        List<Token> tokens = Token.collectTokens(html);
+        List<Token> tokens = parse(html);
         assertEquals(3, tokens.size());
     }
 
@@ -46,11 +46,11 @@ public class ParserTests_LessCoarseGrained {
         assertEquals(value, elementToken.getValue());
     }
 
-    private List<Token> parse(String htmlSnippet) {
-        return Token.collectTokens(htmlSnippet);
-    }
-
     private Token parseAndReturnOneToken(String htmlSnippet, int index) {
         return parse(htmlSnippet).get(index);
+    }
+
+    private List<Token> parse(String htmlSnippet) {
+        return TokenHelper.collectTokens(htmlSnippet);
     }
 }

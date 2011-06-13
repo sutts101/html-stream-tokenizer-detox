@@ -9,25 +9,15 @@ import java.util.List;
 
 abstract public class Token {
 
-    static public List<Token> collectTokens(String html) {
-        try {
-            List<Token> tokens = new ArrayList<Token>();
-            HtmlStreamTokenizer tokenizer = new HtmlStreamTokenizer(new StringReader(html));
-            while (tokenizer.nextToken() != HtmlStreamTokenizer.TT_EOF) {
-                if (tokenizer.getTokenType() == HtmlStreamTokenizer.TT_TAG)
-                {
-                    tokens.add(new TokenWotIsATag(tokenizer));
-                }
-                else
-                {
-                    tokens.add(new TokenWotIsNotATag(tokenizer.getStringValue().toString()));
-                }
-            }
-            return tokens;
-        }
-        catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    final private int _type;
+
+    protected Token(int _type) {
+        this._type = _type;
     }
 
+    final public int getType() {
+        return _type;
+    }
+
+    abstract public String getValue();
 }

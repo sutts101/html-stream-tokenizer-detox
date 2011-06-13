@@ -10,7 +10,8 @@ public class TokenWotIsATag extends Token {
     private String _value;
     private boolean _invalid;
 
-    public TokenWotIsATag(HtmlStreamTokenizer tok) {
+    public TokenWotIsATag(int type, HtmlStreamTokenizer tok) {
+        super(type);
         try
         {
             HtmlTag tag = new HtmlTag();
@@ -30,12 +31,13 @@ public class TokenWotIsATag extends Token {
         }
     }
 
-    public boolean isEmpty() {
-        return _empty;
-    }
-
+    @Override
     public String getValue() {
         return _value;
+    }
+
+    public boolean isEmpty() {
+        return _empty;
     }
 
     public boolean isInvalid() {
