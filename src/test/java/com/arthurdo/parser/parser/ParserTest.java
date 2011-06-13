@@ -11,12 +11,10 @@ public class ParserTest
 {
 	public static void main(String[] args) throws Exception
 	{
-        test3();
+        test4();
 	}
 
-	static void test4()
-		throws HtmlException, IOException
-	{
+    static void test4() {
 		String html =
 			"</html>\n"+
 			"<?XML version=\"1.0\" encoding=\"UTF8\" ?>\n"+
@@ -25,10 +23,11 @@ public class ParserTest
 			"<IMG src=a.gif / >\n"+
 			"";
 
-        tokenizeAndCollect(html);
+        String collected = tokenizeAndCollect(html);
+        System.out.println(collected);
 	}
 
-    static void test3() throws IOException {
+    static void test3() {
 
         String html =
             "<P><B>Please contact Public Affairs Division for the text of the paper	" +
@@ -44,17 +43,18 @@ public class ParserTest
         System.out.println(collected);
 	}
 
-	static void test2() throws IOException {
+	static void test2() {
         String html =
             "<INPUT TYPE=HIDDEN NAME=\"MfcISAPICommand\" VALUE = \"MailBox\">\n"+
             "<applet code=\"htmlstreamer.class\" codebase=\"/classes/demo/parser\"\nalign=\"baseline\" width=\"500\" height=\"800\"\nid=\"htmlstreamer\">\n"+
             "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML//EN\" id=foo disabled>"+
             "";
 
-        tokenizeAndCollect(html);
+        String collected = tokenizeAndCollect(html);
+        System.out.println(collected);
 	}
 
-	static void test1() throws IOException {
+	static void test1() {
         String html =
             "<p><UL><LI>    left	terms and list operators (leftward)</LI>\n"+
             "<LI>    left	-></LI>\n"+
@@ -84,48 +84,54 @@ public class ParserTest
             "<a href=\"/cgi-bin/query?opt&\">"+
             "";
 
-        tokenizeAndCollect(html);
+        String collected = tokenizeAndCollect(html);
+        System.out.println(collected);
 	}
 
-    private static String tokenizeAndCollect(String html) throws IOException {
-        Reader in = new StringReader(html);
-        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-        PrintStream out = new PrintStream(buffer);
-        HtmlStreamTokenizer tok = new HtmlStreamTokenizer(in);
-        HtmlTag tag = new HtmlTag();
-        while (tok.nextToken() != HtmlStreamTokenizer.TT_EOF)
-        {
-            StringBuffer buf = tok.getWhiteSpace();
-            if (buf.length() > 0)
-                out.print(buf.toString());
-
-            if (tok.getTokenType() == HtmlStreamTokenizer.TT_TAG)
+    private static String tokenizeAndCollect(String html) {
+        try {
+            Reader in = new StringReader(html);
+            ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+            PrintStream out = new PrintStream(buffer);
+            HtmlStreamTokenizer tok = new HtmlStreamTokenizer(in);
+            HtmlTag tag = new HtmlTag();
+            while (tok.nextToken() != HtmlStreamTokenizer.TT_EOF)
             {
-                try
-                {
-                    tok.parseTag(tok.getStringValue(), tag);
-                    if (tag.getTagType() == HtmlTag.T_UNKNOWN)
-                        throw new HtmlException("unkown tag");
-                    if (tag.isEmpty())
-                        out.print("EMPTY ");
-                    out.print(tag.toString());
-                }
-                catch (HtmlException e)
-                {
-                    // invalid tag, spit it out
-                    out.print("\ninvalid: ");
-                    out.print("<" + tok.getStringValue() + ">");
-                    out.println("");
-                }
-            }
-            else
-            {
-                buf = tok.getStringValue();
-                HtmlStreamTokenizer.unescape(buf);
+                StringBuffer buf = tok.getWhiteSpace();
                 if (buf.length() > 0)
                     out.print(buf.toString());
+
+                if (tok.getTokenType() == HtmlStreamTokenizer.TT_TAG)
+                {
+                    try
+                    {
+                        tok.parseTag(tok.getStringValue(), tag);
+                        if (tag.getTagType() == HtmlTag.T_UNKNOWN)
+                            throw new HtmlException("unkown tag");
+                        if (tag.isEmpty())
+                            out.print("EMPTY ");
+                        out.print(tag.toString());
+                    }
+                    catch (HtmlException e)
+                    {
+                        // invalid tag, spit it out
+                        out.print("\ninvalid: ");
+                        out.print("<" + tok.getStringValue() + ">");
+                        out.println("");
+                    }
+                }
+                else
+                {
+                    buf = tok.getStringValue();
+                    HtmlStreamTokenizer.unescape(buf);
+                    if (buf.length() > 0)
+                        out.print(buf.toString());
+                }
             }
+            return buffer.toString();
         }
-        return buffer.toString();
+        catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
