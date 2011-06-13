@@ -2,7 +2,7 @@
 // No warranty; no copyright -- use this as you will.
 // $Id: DemoHandler.java,v 1.3 1998/05/01 20:45:16 david Exp $
 
-package demo.sax;
+package com.arthurdo.parser.sax;
 
 import org.xml.sax.HandlerBase;
 import org.xml.sax.InputSource;

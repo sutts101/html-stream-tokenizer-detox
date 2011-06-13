@@ -1,7 +1,7 @@
 // SAX driver for demos.
 // No warranty; no copyright -- use this as you will.
 
-package demo.sax;
+package com.arthurdo.parser.sax;
 
 import java.io.*;
 

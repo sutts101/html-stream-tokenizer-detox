@@ -1,11 +1,9 @@
 // Parser driver for demos.
 // No warranty; no copyright -- use this as you will.
 
-package demo.parser;
+package com.arthurdo.parser.parser;
 
 import java.io.*;
-import java.net.*;
-import java.util.*;
 
 import com.arthurdo.parser.*;
 
