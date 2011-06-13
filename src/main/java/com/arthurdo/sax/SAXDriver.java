@@ -25,7 +25,6 @@ import java.io.*;
 
 import org.xml.sax.*;
 
-import com.arthurdo.io.*;
 import com.arthurdo.parser.*;
 
 /**
