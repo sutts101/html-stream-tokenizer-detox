@@ -4,13 +4,13 @@ import com.arthurdo.parser.HtmlException;
 import com.arthurdo.parser.HtmlStreamTokenizer;
 import com.arthurdo.parser.HtmlTag;
 
-public class TokenWotIsATag extends Token {
+public class ElementToken extends Token {
 
     private boolean _empty;
     private String _value;
     private boolean _invalid;
 
-    public TokenWotIsATag(int type, HtmlStreamTokenizer tok) {
+    public ElementToken(int type, HtmlStreamTokenizer tok) {
         super(type);
         try
         {

@@ -17,11 +17,11 @@ public class TokenHelper {
                 int type = tokenizer.getTokenType();
                 if (type == HtmlStreamTokenizer.TT_TAG)
                 {
-                    tokens.add(new TokenWotIsATag(type, tokenizer));
+                    tokens.add(new ElementToken(type, tokenizer));
                 }
                 else
                 {
-                    tokens.add(new TokenWotIsNotATag(type, tokenizer.getStringValue().toString()));
+                    tokens.add(new OtherToken(type, tokenizer.getStringValue().toString()));
                 }
             }
             return tokens;

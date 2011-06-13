@@ -3,7 +3,6 @@ package com.arthurdo.parser.parser;
 import com.arthurdo.parser.HtmlStreamTokenizer;
 import org.junit.Test;
 
-import java.io.*;
 import java.util.List;
 
 import static junit.framework.Assert.*;
@@ -60,14 +59,14 @@ public class ParserTests_LessCoarseGrained {
     }
 
     private void expectElementToken(Token token, String value, boolean empty, boolean invalid) {
-        TokenWotIsATag elementToken = (TokenWotIsATag) token;
+        ElementToken elementToken = (ElementToken) token;
         assertEquals(value, elementToken.getValue());
         assertEquals(empty, elementToken.isEmpty());
         assertEquals(invalid, elementToken.isInvalid());
     }
 
     private void expectNonElementToken(Token token, int type, String value) {
-        TokenWotIsNotATag nonElementToken = (TokenWotIsNotATag) token;
+        OtherToken nonElementToken = (OtherToken) token;
         assertEquals(type, nonElementToken.getType());
         assertEquals(value, nonElementToken.getValue());
     }

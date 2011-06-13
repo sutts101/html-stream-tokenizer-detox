@@ -1,10 +1,10 @@
 package com.arthurdo.parser.parser;
 
-public class TokenWotIsNotATag extends Token {
+public class OtherToken extends Token {
 
     final private String _value;
 
-    public TokenWotIsNotATag(int type, String value) {
+    public OtherToken(int type, String value) {
         super(type);
         this._value = value;
     }
