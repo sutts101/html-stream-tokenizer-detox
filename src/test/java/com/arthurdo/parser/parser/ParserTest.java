@@ -17,21 +17,20 @@ public class ParserTest
 	static void test4()
 		throws HtmlException, IOException
 	{
-		Reader in = new StringReader(
+		String html =
 			"</html>\n"+
 			"<?XML version=\"1.0\" encoding=\"UTF8\" ?>\n"+
 			"<!DOCTYPE>\n"+
 			"<IMG/>\n"+
 			"<IMG src=a.gif / >\n"+
-			""
-			);
+			"";
 
-        tokenizeAndPrintOutputs(in);
+        tokenizeAndPrintOutputs(html);
 	}
 
     static void test3() throws IOException {
 
-        Reader in = new StringReader(
+        String html =
             "<P><B>Please contact Public Affairs Division for the text of the paper	" +
             "&amp; the authors for further comment</B> </P> " +
             "a &amp; b" +
@@ -39,25 +38,23 @@ public class ParserTest
             "a &amp&amp b" +
             "a &lt&amp b" +
             "a &amp&gt b" +
-            ""
-            );
+            "";
 
-        tokenizeAndPrintOutputs(in);
+        tokenizeAndPrintOutputs(html);
 	}
 
 	static void test2() throws IOException {
-        Reader in = new StringReader(
+        String html =
             "<INPUT TYPE=HIDDEN NAME=\"MfcISAPICommand\" VALUE = \"MailBox\">\n"+
             "<applet code=\"htmlstreamer.class\" codebase=\"/classes/demo/parser\"\nalign=\"baseline\" width=\"500\" height=\"800\"\nid=\"htmlstreamer\">\n"+
             "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML//EN\" id=foo disabled>"+
-            ""
-            );
+            "";
 
-        tokenizeAndPrintOutputs(in);
+        tokenizeAndPrintOutputs(html);
 	}
 
 	static void test1() throws IOException {
-        Reader in = new StringReader(
+        String html =
             "<p><UL><LI>    left	terms and list operators (leftward)</LI>\n"+
             "<LI>    left	-></LI>\n"+
             "<LI>    nonassoc	++ --</LI>\n"+
@@ -84,13 +81,13 @@ public class ParserTest
             "<LI>    left	or xor</LI>\n"+
             "</UL>\n"+
             "<a href=\"/cgi-bin/query?opt&\">"+
-            ""
-            );
+            "";
 
-        tokenizeAndPrintOutputs(in);
+        tokenizeAndPrintOutputs(html);
 	}
 
-    private static void tokenizeAndPrintOutputs(Reader in) throws IOException {
+    private static void tokenizeAndPrintOutputs(String html) throws IOException {
+        Reader in = new StringReader(html);
         HtmlStreamTokenizer tok = new HtmlStreamTokenizer(in);
         HtmlTag tag = new HtmlTag();
         while (tok.nextToken() != HtmlStreamTokenizer.TT_EOF)
