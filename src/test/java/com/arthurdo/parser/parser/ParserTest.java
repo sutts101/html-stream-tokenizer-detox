@@ -6,15 +6,13 @@ package com.arthurdo.parser.parser;
 import java.io.*;
 
 import com.arthurdo.parser.*;
+import org.junit.Assert;
+import org.junit.Test;
 
 public class ParserTest
 {
-	public static void main(String[] args) throws Exception
-	{
-        test4();
-	}
-
-    static void test4() {
+    @Test
+    public void test4() {
 		String html =
 			"</html>\n"+
 			"<?XML version=\"1.0\" encoding=\"UTF8\" ?>\n"+
@@ -23,11 +21,21 @@ public class ParserTest
 			"<IMG src=a.gif / >\n"+
 			"";
 
+        String expected =
+                "</html>\n" +
+                "\n" +
+                "invalid: <?XML version=\"1.0\" encoding=\"UTF8\" ?>\n" +
+                "\n" +
+                "DOCTYPE\n" +
+                "EMPTY <IMG />\n" +
+                "EMPTY <IMG src=\"a.gif\" />\n";
+
         String collected = tokenizeAndCollect(html);
-        System.out.println(collected);
+        Assert.assertEquals(expected, collected);
 	}
 
-    static void test3() {
+    @Test
+    public void test3() {
 
         String html =
             "<P><B>Please contact Public Affairs Division for the text of the paper	" +
@@ -39,22 +47,31 @@ public class ParserTest
             "a &amp&gt b" +
             "";
 
+        String expected = "<P><B>Please contact Public Affairs Division for the text of the paper\t& the authors for further comment</B> </P> a & ba AT&T&ba &&ba <&ba &>b";
+
         String collected = tokenizeAndCollect(html);
-        System.out.println(collected);
+        Assert.assertEquals(expected, collected);
 	}
 
-	static void test2() {
+    @Test
+    public void test2() {
         String html =
             "<INPUT TYPE=HIDDEN NAME=\"MfcISAPICommand\" VALUE = \"MailBox\">\n"+
             "<applet code=\"htmlstreamer.class\" codebase=\"/classes/demo/parser\"\nalign=\"baseline\" width=\"500\" height=\"800\"\nid=\"htmlstreamer\">\n"+
             "<!DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML//EN\" id=foo disabled>"+
             "";
 
+        String expected =
+                "<INPUT TYPE=\"HIDDEN\" NAME=\"MfcISAPICommand\" VALUE=\"MailBox\">\n" +
+                        "<applet code=\"htmlstreamer.class\" codebase=\"/classes/demo/parser\" align=\"baseline\" width=\"500\" height=\"800\" id=\"htmlstreamer\">\n" +
+                        "DOCTYPE HTML PUBLIC \"-//IETF//DTD HTML//EN\" id=foo disabled";
+
         String collected = tokenizeAndCollect(html);
-        System.out.println(collected);
+        Assert.assertEquals(expected, collected);
 	}
 
-	static void test1() {
+    @Test
+    public void test1() {
         String html =
             "<p><UL><LI>    left	terms and list operators (leftward)</LI>\n"+
             "<LI>    left	-></LI>\n"+
@@ -84,8 +101,42 @@ public class ParserTest
             "<a href=\"/cgi-bin/query?opt&\">"+
             "";
 
+        String expected =
+                "<p><UL><LI>    left\tterms and list operators (leftward)</LI>\n" +
+                        "<LI>    left\t-></LI>\n" +
+                        "<LI>    nonassoc\t++ --</LI>\n" +
+                        "<LI>    right\t**</LI>\n" +
+                        "<LI>    right\t! ~ \\ and unary + and -</LI>\n" +
+                        "<LI>    left\t=~ !~ </LI>\n" +
+                        "<LI>    left\t* / % x</LI>\n" +
+                        "<LI>    left\t+ - .</LI>\n" +
+                        "<LI>    left\t<< >></LI>\n" +
+                        "<LI>    nonassoc\tnamed unary operators</LI>\n" +
+                        "<LI>    nonassoc\t\n" +
+                        "invalid: < >\n" +
+                        " \n" +
+                        "invalid: <= >\n" +
+                        "= lt gt le ge</LI>\n" +
+                        "<LI>    nonassoc\t== != \n" +
+                        "invalid: <=>\n" +
+                        " eq ne cmp</LI>\n" +
+                        "<LI>    left\t</LI>\n" +
+                        "<LI>    left\t| ^</LI>\n" +
+                        "<LI>    left\t&</LI>\n" +
+                        "<LI>    left\t||</LI>\n" +
+                        "<LI>    nonassoc\t..</LI>\n" +
+                        "<LI>    right\t?:</LI>\n" +
+                        "<LI>    right\t= += -= *= etc.</LI>\n" +
+                        "<LI>    left\t, =></LI>\n" +
+                        "<LI>    nonassoc\tlist operators (rightward)</LI>\n" +
+                        "<LI>    left\tnot</LI>\n" +
+                        "<LI>    left\tand</LI>\n" +
+                        "<LI>    left\tor xor</LI>\n" +
+                        "</UL>\n" +
+                        "<a href=\"/cgi-bin/query?opt&\">";
+
         String collected = tokenizeAndCollect(html);
-        System.out.println(collected);
+        Assert.assertEquals(expected, collected);
 	}
 
     private static String tokenizeAndCollect(String html) {
@@ -117,7 +168,7 @@ public class ParserTest
                         // invalid tag, spit it out
                         out.print("\ninvalid: ");
                         out.print("<" + tok.getStringValue() + ">");
-                        out.println("");
+                        out.print("\n");
                     }
                 }
                 else
