@@ -9,23 +9,9 @@ import com.arthurdo.parser.*;
 
 public class ParserTest
 {
-	public static void main(String[] args)
+	public static void main(String[] args) throws Exception
 	{
-		try
-		{
-			ParserTest app = new ParserTest();
-
-			if (false)
-				test4();
-		}
-		catch (HtmlException e)
-		{
-			System.out.println(e.getMessage());
-		}
-		catch (IOException e)
-		{
-			System.out.println(e.getMessage());
-		}
+        test3();
 	}
 
 	static void test4()
@@ -188,7 +174,7 @@ public class ParserTest
 		}
 	}
 
-	void test1()
+	static void test1()
 	{
 		try
 		{
