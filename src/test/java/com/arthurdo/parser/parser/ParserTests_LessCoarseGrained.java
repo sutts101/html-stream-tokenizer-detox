@@ -10,18 +10,6 @@ import static junit.framework.Assert.*;
 public class ParserTests_LessCoarseGrained {
 
     @Test
-    public void shouldHandleStartElement() {
-        Token token = parseAndReturnOneToken("<p>", 0);
-        expectElementToken(token, "<p>", false, false);
-    }
-
-    @Test
-    public void shouldHandleEndElement() {
-        Token token = parseAndReturnOneToken("</p>", 0);
-        expectElementToken(token, "</p>", false, false);
-    }
-
-    @Test
     public void shouldHandleText() {
         Token token = parseAndReturnOneToken("hallo world", 0);
         expectNonElementToken(token, HtmlStreamTokenizer.TT_TEXT, "hallo world");
@@ -35,21 +23,33 @@ public class ParserTests_LessCoarseGrained {
     }
 
     @Test
+    public void shouldHandleStartElement() {
+        Token token = parseAndReturnOneToken("<p>", 0);
+        expectElementToken(token, "<p>", Valid.Yes, Empty.No);
+    }
+
+    @Test
+    public void shouldHandleEndElement() {
+        Token token = parseAndReturnOneToken("</p>", 0);
+        expectElementToken(token, "</p>", Valid.Yes, Empty.No);
+    }
+
+    @Test
     public void shouldHandleImage() {
         Token token = parseAndReturnOneToken("<img src=x/>", 0);
-        expectElementToken(token, "<img src=\"x\" />", true, false);
+        expectElementToken(token, "<img src=\"x\" />", Valid.Yes, Empty.Yes);
     }
 
     @Test
     public void shouldHandleEmptyImageByClaimingNotEmpty() {
         Token token = parseAndReturnOneToken("<img>", 0);
-        expectElementToken(token, "<img>", false, false);
+        expectElementToken(token, "<img>", Valid.Yes, Empty.No);
     }
 
     @Test
     public void doesNotLikeXmlHeader() {
         Token token = parseAndReturnOneToken("<?XML version=\"1.0\" encoding=\"UTF8\" ?>", 0);
-        expectElementToken(token, "<?XML version=\"1.0\" encoding=\"UTF8\" ?>", false, true);
+        expectElementToken(token, "<?XML version=\"1.0\" encoding=\"UTF8\" ?>", Valid.No, Empty.No);
     }
 
     @Test
@@ -63,11 +63,11 @@ public class ParserTests_LessCoarseGrained {
         parse("<>  <elementName <another >>>>>>>>");
     }
 
-    private void expectElementToken(Token token, String value, boolean empty, boolean invalid) {
+    private void expectElementToken(Token token, String value, Valid valid, Empty empty) {
         ElementToken elementToken = (ElementToken) token;
         assertEquals(value, elementToken.getValue());
-        assertEquals(empty, elementToken.isEmpty());
-        assertEquals(invalid, elementToken.isInvalid());
+        assertEquals(empty.toBoolean(), elementToken.isEmpty());
+        assertEquals(valid.toBoolean(), !elementToken.isInvalid());
     }
 
     private void expectNonElementToken(Token token, int type, String value) {
@@ -83,4 +83,7 @@ public class ParserTests_LessCoarseGrained {
     private List<Token> parse(String htmlSnippet) {
         return TokenHelper.collectTokens(htmlSnippet);
     }
+
+    private enum Valid { Yes, No; public boolean toBoolean() {return this == Yes; } }
+    private enum Empty { Yes, No; public boolean toBoolean() {return this == Yes; } }
 }
