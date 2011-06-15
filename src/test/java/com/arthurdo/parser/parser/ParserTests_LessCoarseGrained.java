@@ -5,7 +5,7 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static junit.framework.Assert.*;
+import static junit.framework.Assert.assertEquals;
 
 public class ParserTests_LessCoarseGrained {
 
@@ -20,6 +20,14 @@ public class ParserTests_LessCoarseGrained {
         String html = "<p>Hallo world</p>";
         List<Token> tokens = parse(html);
         assertEquals(3, tokens.size());
+    }
+
+    @Test
+    public void shouldHandleNonXmlNesting() {
+        String html = "<b><i>Hallo world</b></i>";
+        List<Token> tokens = parse(html);
+        assertEquals(5, tokens.size());
+        assertEquals(join(tokens), "<b><i>Hallo world</b></i>");
     }
 
     @Test
@@ -84,6 +92,15 @@ public class ParserTests_LessCoarseGrained {
         return TokenHelper.collectTokens(htmlSnippet);
     }
 
+    private String join(List<Token> tokens) {
+        StringBuilder sb = new StringBuilder();
+        for (Token token : tokens) {
+            sb.append(token.getValue());
+        }
+        return sb.toString();
+    }
+
     private enum Valid { Yes, No; public boolean toBoolean() {return this == Yes; } }
     private enum Empty { Yes, No; public boolean toBoolean() {return this == Yes; } }
+
 }
