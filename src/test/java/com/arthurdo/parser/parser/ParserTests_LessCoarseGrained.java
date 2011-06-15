@@ -58,6 +58,11 @@ public class ParserTests_LessCoarseGrained {
         expectNonElementToken(token, HtmlStreamTokenizer.TT_BANGTAG, "DOCTYPE");
     }
 
+    @Test
+    public void shouldComplainSometimes_ButDoesntSeemTo() {
+        parse("<>  <elementName <another >>>>>>>>");
+    }
+
     private void expectElementToken(Token token, String value, boolean empty, boolean invalid) {
         ElementToken elementToken = (ElementToken) token;
         assertEquals(value, elementToken.getValue());
