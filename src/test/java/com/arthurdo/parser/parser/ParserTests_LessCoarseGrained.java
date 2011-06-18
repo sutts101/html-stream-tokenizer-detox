@@ -27,7 +27,7 @@ public class ParserTests_LessCoarseGrained {
         String html = "<b><i>Hallo world</b></i>";
         List<Token> tokens = parse(html);
         assertEquals(5, tokens.size());
-        assertEquals(join(tokens), "<b><i>Hallo world</b></i>");
+        assertEquals("<b><i>Hallo world</b></i>", join(tokens));
     }
 
     @Test
