@@ -1,13 +1,16 @@
-package com.arthurdo.parser.parser;
+package com.arthurdo.parser;
 
-import com.arthurdo.parser.HtmlStreamTokenizer;
+import com.arthurdo.parser.helper.ElementToken;
+import com.arthurdo.parser.helper.OtherToken;
+import com.arthurdo.parser.helper.Token;
+import com.arthurdo.parser.helper.TokenHelper;
 import org.junit.Test;
 
 import java.util.List;
 
 import static junit.framework.Assert.assertEquals;
 
-public class ParserTests_LessCoarseGrained {
+public class ParserTests {
 
     @Test
     public void shouldHandleText() {

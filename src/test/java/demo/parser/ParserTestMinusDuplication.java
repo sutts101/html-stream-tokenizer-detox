@@ -1,7 +1,7 @@
 // Parser driver for demos.
 // No warranty; no copyright -- use this as you will.
 
-package com.arthurdo.parser.parser;
+package demo.parser;
 
 import java.io.*;
 
@@ -9,7 +9,7 @@ import com.arthurdo.parser.*;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class ParserTests_Original_CoarseGrained
+public class ParserTestMinusDuplication
 {
     @Test
     public void test4() {

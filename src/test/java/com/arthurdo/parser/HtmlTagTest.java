@@ -1,4 +1,4 @@
-package com.arthurdo.parser.parser;
+package com.arthurdo.parser;
 
 import com.arthurdo.parser.HtmlException;
 import com.arthurdo.parser.HtmlTag;
@@ -14,7 +14,6 @@ public class HtmlTagTest {
     @Before
     public void setup() {
         _tag = new HtmlTag();
-
     }
 
     @Test

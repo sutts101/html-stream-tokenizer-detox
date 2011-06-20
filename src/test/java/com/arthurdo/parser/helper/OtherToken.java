@@ -1,4 +1,4 @@
-package com.arthurdo.parser.parser;
+package com.arthurdo.parser.helper;
 
 public class OtherToken extends Token {
 
