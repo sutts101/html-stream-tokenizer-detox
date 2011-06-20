@@ -1,0 +1,19 @@
+!!! use cloccsv to get by file data !!!
+       8 text files.
+classified 8 files       8 unique files.                              
+       1 file ignored.
+
+http://cloc.sourceforge.net v 1.51  T=0.5 s (14.0 files/s, 5038.0 lines/s)
+-------------------------------------------------------------------------------------------------
+File                                                          blank        comment           code
+-------------------------------------------------------------------------------------------------
+./com/arthurdo/parser/HtmlStreamTokenizer.java                   78            175            660
+./com/arthurdo/parser/HtmlTag.java                               39            116            404
+./com/arthurdo/parser/Table.java                                 41             99            371
+./com/arthurdo/sax/SAXDriver.java                                23             39            214
+./com/arthurdo/parser/TableCell.java                             13             85             61
+./com/arthurdo/sax/SAXElement.java                                9             24             33
+./com/arthurdo/parser/HtmlException.java                          5             18             12
+-------------------------------------------------------------------------------------------------
+SUM:                                                            208            556           1755
+-------------------------------------------------------------------------------------------------
