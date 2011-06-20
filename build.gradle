@@ -12,7 +12,6 @@ dependencies {
 
 repositories {
     flatDir(dirs: file('lib'))
-    flatDir(dirs: file('C:/Tools/emma-2.0.5312/lib'))
 }
 
 test{
