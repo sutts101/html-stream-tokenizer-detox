@@ -1,73 +1,48 @@
 apply plugin: 'java'
 
-task('xcheck') {
-    println(project.buildDirName)
-	project.classesDirName = "classes"
-	project.srcDirNames = ["src"]
+configurations{
+    emma
 }
+
 dependencies {
+    emma "emma:emma:2.0.5312"
+    emma "emma:emma_ant:2.0.5312"
     testCompile group: 'junit', name: 'junit', version: '4.+'
-    testRuntime group: 'cobertura', name: 'cobertura', version: '1.9.4.1'
 }
 
 repositories {
     flatDir(dirs: file('lib'))
-    flatDir(dirs: file('C:/Tools/cobertura-1.9.4.1'))
-} 
-
-test.doFirst { task ->
-	// instrument classes with cobertura to get code coverage
-	def coberturaHome = System.getProperty('cobertura.home');
-	def userHome = System.getProperty('user.home');
-	if (coberturaHome == null) {
-		// some default values for cobertura home
-		coberturaHome = [ 
-			 'C:/Tools/cobertura-1.9.4.1', 
-			 '/opt/cobertura-1.9', 
-			 "${userHome}/cobertura-1.9" 
-		].find { new File(it).exists() }
-	}
-	// delete data file for cobertura, otherwise coverage would be added
-	ant.delete(file:"${project.buildDirName}/*.ser", failonerror:false)
-	// delete copy of original classes
-	ant.delete(dir:"${project.buildDirName}/${project.classesDirName}-orig", failonerror:false)
-	if (coberturaHome != null) {
-		ant.taskdef(resource:'tasks.properties') {
-			classpath { 
-				pathelement(location:"${coberturaHome}/cobertura.jar")
-				fileset(dir:"${coberturaHome}/lib", includes:'*.jar')
-			}
-		}
-		// create copy (backup) of original class files
-		ant.copy(todir:"${project.buildDirName}/${project.classesDirName}-orig") {
-			fileset(dir:"${project.buildDirName}/${project.classesDirName}")
-		}
-		// instrument the classes in-place
-		ant.'cobertura-instrument'(datafile:"${project.buildDirName}/cobertura.ser") {
-			// only instrument the relevant classes
-			fileset(dir:"${project.buildDirName}/${project.classesDirName}", 
-					includes:"**/*.class")
-		}
-		// make sure that cobertura is in the test class path
-		//task.unmanagedClasspath new File("${coberturaHome}/cobertura.jar")
-	}
+    flatDir(dirs: file('C:/Tools/emma-2.0.5312/lib'))
 }
 
-test.doLast {
-	if (new File("${project.buildDirName}/${project.classesDirName}-orig").exists()) {
-		// replace instrumented classes with backup copy again
-		ant.delete(file:"${project.buildDirName}/${project.classesDirName}")
-		ant.move(file:"${project.buildDirName}/${project.classesDirName}-orig",
-				 tofile:"${project.buildDirName}/${project.classesDirName}")
-		ant.copy(file:"${project.buildDirName}/cobertura.ser",
-				 tofile:"${project.buildDirName}/../cobertura.ser")
-		// create cobertura reports
-		ant.'cobertura-report'(destdir:"${project.buildDirName}/test-results", format:'xml') {
-			//println("####report: " + project.buildDirName)
-			project.srcDirNames.each { fileset(dir:it) }
-		}
-		ant.'cobertura-report'(destdir:"${project.buildDirName}/reports/coverage", format:'html') {
-			project.srcDirNames.each { fileset(dir:it) }
-		}
-	}
+test{
+   jvmArgs "-Demma.coverage.out.file=build/tmp/emma/metadata.emma", "-Demma.coverage.out.merge=true"
+
+   doFirst{
+      ant.taskdef( resource:"emma_ant.properties", classpath: configurations.emma.asPath)
+        ant.path(id:"run.classpath"){
+            pathelement(location:sourceSets.main.classesDir.absolutePath )
+        }
+        ant.emma(verbosity:'info'){
+            instr(merge:"true", destdir:'build/tmp/emma/instr', instrpathref:"run.classpath", metadatafile:'build/tmp/emma/metadata.emma'){
+                instrpath{
+                    fileset(dir:sourceSets.main.classesDir.absolutePath, includes:"*.class")
+                }
+            }
+        }
+         setClasspath(files("$buildDir/tmp/emma/instr") + configurations.emma +  getClasspath())
+      }
+
+    doLast{
+        ant.emma(enabled:"true"){
+            report(sourcepath:"src/main/java"){
+                fileset(dir:"build/tmp/emma"){
+                    include(name:"*.emma")
+                }
+                txt(outfile:"build/reports/emma/coverage.txt")
+                html(outfile:"build/reports/emma/coverage.html")
+                xml(outfile:"build/reports/emma/coverage.xml")
+            }
+        }
+    }
 }
