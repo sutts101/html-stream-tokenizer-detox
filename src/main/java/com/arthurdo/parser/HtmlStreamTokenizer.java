@@ -69,6 +69,66 @@ import java.io.*;
  */
 public class HtmlStreamTokenizer
 {
+
+    private int m_ttype;
+	private StringBuffer m_buf = new StringBuffer(128);
+	private StringBuffer m_whitespace = new StringBuffer();
+	private int m_pushback = 0;
+	private int m_lineno = 1;
+	private int m_comment = 0;
+
+	private char[] m_cdata_end = null;
+	private int m_cdata = -1;
+	private boolean m_cdata_pushback = false;
+	private boolean m_isCDTATA = false;
+	private static char[] m_xmlcdata_end = "]]>".toCharArray();
+
+    private static final int STATE_EOF = -1;
+    private static final int STATE_COMMENT = -2;
+    private static final int STATE_TEXT = -3;
+    private static final int STATE_TAG = -4;
+    private static final int STATE_WS = -5;
+	private static final int STATE_TAG_QUOTE = -6;
+	private static final int STATE_BANGTAG = -7;
+	private static final int STATE_ENTITYREF = -8;
+
+	private int m_state = STATE_TEXT;
+
+	//private InputStream m_in;
+	private Reader m_in; //input reader appears to be an order of magnitude slower than inputstream!
+
+	/*package*/ static final char C_ENDTAG = '/';
+	private static final char C_EMPTY = '/';	// XML char for empty tags
+	private static final char C_SINGLEQUOTE = '\'';
+	private static final char C_DOUBLEQUOTE = '"';
+	private int m_tagquote;
+
+	private static final int CTYPE_LEN = 256;
+    private static byte m_ctype[] = new byte[CTYPE_LEN];
+    private static final byte CT_WHITESPACE = 1;
+    private static final byte CT_DIGIT = 2;
+    private static final byte CT_ALPHA = 4;
+    private static final byte CT_QUOTE = 8;
+    private static final byte CT_COMMENT = 16;
+
+    private boolean m_unescape = false;
+	private boolean m_getEntities = false; //return TT_ENTITYREFERENCE
+
+	static
+	{
+		int len = m_ctype.length;
+		for (int i = 0; i < len; i++)
+			m_ctype[i] = 0;
+
+		m_ctype[' '] = CT_WHITESPACE;
+		m_ctype['\r'] = CT_WHITESPACE;
+		m_ctype['\n'] = CT_WHITESPACE;
+		m_ctype['\t'] = CT_WHITESPACE;
+		for (int i = 0x0E; i <= 0x1F; i++)
+			m_ctype[i] = CT_WHITESPACE;
+
+	}
+
 	/**
 	 * end of stream.
 	 */
@@ -116,74 +176,15 @@ public class HtmlStreamTokenizer
 		m_state = STATE_TEXT;
 	}
 
-	/**
-	 * @return	token type, one of the <b>TT_</b> defines
-	 */
-	public final int getTokenType()
-	{
-		return m_ttype;
-	}
+    public boolean isUnescaped()
+    {
+        return m_unescape;
+    }
 
-	/**
-	 * @return	string value of the token
-	 */
-	public final StringBuffer getStringValue()
-	{
-		return m_buf;
-	}
-
-	/**
-	 * @return string value of the token, including characters stripped off by the tokenizer
-	 */
-	public final String getRawString()
-	{
-		switch (m_ttype)
-		{
-		case TT_TAG:
-			return "<" + m_buf.toString() + ">";
-		case TT_BANGTAG:
-			return "<!" + m_buf.toString() + ">";
-		case TT_COMMENT:
-			return "<!--" + m_buf.toString() + "-->";
-		case TT_ENTITYREFERENCE:
-			return "&" + m_buf.toString() + ";";
-		default:
-			return m_buf.toString();
-		}
-	}
-
-	/**
-	 * @deprecated	white space is now returned as TT_TEXT. This buffer is always
-	 *				empty.
-	 * @return	any white space accumulated since last call to nextToken
-	 */
-	public final StringBuffer getWhiteSpace()
-	{
-		return m_whitespace;
-	}
-
-	/**
-	 * @return	current line number. Every time nextToken() sees a new
-	 *			line character ('\n'), it increments the line number.
-	 */
-	public int getLineNumber()
-	{
-		return m_lineno;
-	}
-
-	/**
-    * @param exitString CDATA mode will terminate when it encounters this string
-     * @param pushbackExitString whether to parse the exit string again or not
-     * it'd be an error to call enterCDATAMode(exitString, true); getToken()==TT_CDATA; enterCDATAMode(differentExitString, true); 'cause the next getToken() call will parse differentExitString instead of exitString
-	*/
-	public void enterCDATAMode(char[] exitString, boolean pushbackExitString)
-	{
-		m_cdata_end = exitString;
-		m_cdata = 0;
-		m_cdata_pushback = pushbackExitString;
-	}
-
-	public boolean isCDATA() { return m_isCDTATA; }
+    public void setUnescaped(boolean unescape)
+    {
+        m_unescape = unescape;
+    }
 
 	/**
 	 * @return	the next token
@@ -492,95 +493,6 @@ public class HtmlStreamTokenizer
 		parseParams(tag, buf, idx);
 	}
 
-	public static String unescape(String buf)
-	{
-		return HtmlEscaping.unescape(buf);
-	}
-
-	public static void unescape(StringBuffer buf)
-	{
-        HtmlEscaping.unescape(buf);
-	}
-
-    private int m_ttype;
-	private StringBuffer m_buf = new StringBuffer(128);
-	private StringBuffer m_whitespace = new StringBuffer();
-	private int m_pushback = 0;
-	private int m_lineno = 1;
-	private int m_comment = 0;
-
-	private char[] m_cdata_end = null;
-	private int m_cdata = -1;
-	private boolean m_cdata_pushback = false;
-	private boolean m_isCDTATA = false;
-	private static char[] m_xmlcdata_end = "]]>".toCharArray();
-
-    private static final int STATE_EOF = -1;
-    private static final int STATE_COMMENT = -2;
-    private static final int STATE_TEXT = -3;
-    private static final int STATE_TAG = -4;
-    private static final int STATE_WS = -5;
-	private static final int STATE_TAG_QUOTE = -6;
-	private static final int STATE_BANGTAG = -7;
-	private static final int STATE_ENTITYREF = -8;
-
-	private int m_state = STATE_TEXT;
-
-	//private InputStream m_in;
-	private Reader m_in; //input reader appears to be an order of magnitude slower than inputstream!
-
-	/*package*/ static final char C_ENDTAG = '/';
-	private static final char C_EMPTY = '/';	// XML char for empty tags
-	private static final char C_SINGLEQUOTE = '\'';
-	private static final char C_DOUBLEQUOTE = '"';
-	private int m_tagquote;
-
-	private static final int CTYPE_LEN = 256;
-    private static byte m_ctype[] = new byte[CTYPE_LEN];
-    private static final byte CT_WHITESPACE = 1;
-    private static final byte CT_DIGIT = 2;
-    private static final byte CT_ALPHA = 4;
-    private static final byte CT_QUOTE = 8;
-    private static final byte CT_COMMENT = 16;
-
-    private boolean m_unescape = false;
-	private boolean m_getEntities = false; //return TT_ENTITYREFERENCE
-
-	static
-	{
-		int len = m_ctype.length;
-		for (int i = 0; i < len; i++)
-			m_ctype[i] = 0;
-
-		m_ctype[' '] = CT_WHITESPACE;
-		m_ctype['\r'] = CT_WHITESPACE;
-		m_ctype['\n'] = CT_WHITESPACE;
-		m_ctype['\t'] = CT_WHITESPACE;
-		for (int i = 0x0E; i <= 0x1F; i++)
-			m_ctype[i] = CT_WHITESPACE;
-
-	}
-
-	static boolean isSpace(int c)
-	{
-		 return c >=0 && c < CTYPE_LEN ? (m_ctype[c] & CT_WHITESPACE) != 0: false;
-	}
-
-	static boolean isPunct(char c)
-	{
-		return !Character.isLetterOrDigit(c);
-	}
-
-	public boolean isUnescaped()
-	{
-		return m_unescape;
-	}
-
-	public void setUnescaped(boolean unescape)
-	{
-		m_unescape = unescape;
-	}
-
     private void parseParams(HtmlTag tag, String buf, int idx)
 		throws HtmlException
 	{
@@ -720,5 +632,99 @@ public class HtmlStreamTokenizer
 			tag.setWhitespace(name, whitespaceBefore, whitespaceAfter);
 		}
 	}
+
+
+    /**
+     * @return	token type, one of the <b>TT_</b> defines
+     */
+    public final int getTokenType()
+    {
+        return m_ttype;
+    }
+
+    /**
+     * @return	string value of the token
+     */
+    public final StringBuffer getStringValue()
+    {
+        return m_buf;
+    }
+
+    /**
+     * @return string value of the token, including characters stripped off by the tokenizer
+     */
+    public final String getRawString()
+    {
+        switch (m_ttype)
+        {
+        case TT_TAG:
+            return "<" + m_buf.toString() + ">";
+        case TT_BANGTAG:
+            return "<!" + m_buf.toString() + ">";
+        case TT_COMMENT:
+            return "<!--" + m_buf.toString() + "-->";
+        case TT_ENTITYREFERENCE:
+            return "&" + m_buf.toString() + ";";
+        default:
+            return m_buf.toString();
+        }
+    }
+
+    /**
+     * @deprecated	white space is now returned as TT_TEXT. This buffer is always
+     *				empty.
+     * @return	any white space accumulated since last call to nextToken
+     */
+    public final StringBuffer getWhiteSpace()
+    {
+        return m_whitespace;
+    }
+
+    /**
+     * @return	current line number. Every time nextToken() sees a new
+     *			line character ('\n'), it increments the line number.
+     */
+    public int getLineNumber()
+    {
+        return m_lineno;
+    }
+
+    /**
+    * @param exitString CDATA mode will terminate when it encounters this string
+     * @param pushbackExitString whether to parse the exit string again or not
+     * it'd be an error to call enterCDATAMode(exitString, true); getToken()==TT_CDATA; enterCDATAMode(differentExitString, true); 'cause the next getToken() call will parse differentExitString instead of exitString
+    */
+    public void enterCDATAMode(char[] exitString, boolean pushbackExitString)
+    {
+        m_cdata_end = exitString;
+        m_cdata = 0;
+        m_cdata_pushback = pushbackExitString;
+    }
+
+    public boolean isCDATA() { return m_isCDTATA; }
+
+
+
+
+    public static String unescape(String buf)
+    {
+        return HtmlEscaping.unescape(buf);
+    }
+
+    public static void unescape(StringBuffer buf)
+    {
+        HtmlEscaping.unescape(buf);
+    }
+
+    static boolean isSpace(int c)
+    {
+         return c >=0 && c < CTYPE_LEN ? (m_ctype[c] & CT_WHITESPACE) != 0: false;
+    }
+
+    static boolean isPunct(char c)
+    {
+        return !Character.isLetterOrDigit(c);
+    }
+
 }
 
