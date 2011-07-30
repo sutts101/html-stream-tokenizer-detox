@@ -94,40 +94,14 @@ public class HtmlStreamTokenizer
 
 	private int m_state = STATE_TEXT;
 
+    private int m_tagquote;
+
 	//private InputStream m_in;
 	private Reader m_in; //input reader appears to be an order of magnitude slower than inputstream!
-
-	/*package*/ static final char C_ENDTAG = '/';
-	private static final char C_EMPTY = '/';	// XML char for empty tags
-	private static final char C_SINGLEQUOTE = '\'';
-	private static final char C_DOUBLEQUOTE = '"';
-	private int m_tagquote;
-
-	private static final int CTYPE_LEN = 256;
-    private static byte m_ctype[] = new byte[CTYPE_LEN];
-    private static final byte CT_WHITESPACE = 1;
-    private static final byte CT_DIGIT = 2;
-    private static final byte CT_ALPHA = 4;
-    private static final byte CT_QUOTE = 8;
-    private static final byte CT_COMMENT = 16;
 
     private boolean m_unescape = false;
 	private boolean m_getEntities = false; //return TT_ENTITYREFERENCE
 
-	static
-	{
-		int len = m_ctype.length;
-		for (int i = 0; i < len; i++)
-			m_ctype[i] = 0;
-
-		m_ctype[' '] = CT_WHITESPACE;
-		m_ctype['\r'] = CT_WHITESPACE;
-		m_ctype['\n'] = CT_WHITESPACE;
-		m_ctype['\t'] = CT_WHITESPACE;
-		for (int i = 0x0E; i <= 0x1F; i++)
-			m_ctype[i] = CT_WHITESPACE;
-
-	}
 
 	/**
 	 * end of stream.
@@ -345,7 +319,7 @@ public class HtmlStreamTokenizer
 						m_state = STATE_TEXT;
 						return m_ttype = TT_TAG;
 					}
-					else if (c == C_SINGLEQUOTE || c == C_DOUBLEQUOTE)
+					else if (c == HtmlUtils.C_SINGLEQUOTE || c == HtmlUtils.C_DOUBLEQUOTE)
 					{
 						// handle quotes inside tag
 						m_tagquote = c;
@@ -473,7 +447,7 @@ public class HtmlStreamTokenizer
 		if (idx == len)
 			throw new HtmlException("parse empty tag");
 
-		if (buf.charAt(idx) == C_ENDTAG)
+		if (buf.charAt(idx) == HtmlUtils.C_ENDTAG)
 		{
 			tag.setEndTag(true);
 			idx++;
@@ -484,7 +458,7 @@ public class HtmlStreamTokenizer
 
 		begin = idx;
 		// deal with empty tags like <img/>
-		while (idx < len && !isSpace(buf.charAt(idx)) && buf.charAt(idx) != C_EMPTY)
+		while (idx < len && !isSpace(buf.charAt(idx)) && buf.charAt(idx) != HtmlUtils.C_EMPTY)
 			idx++;
 		String token = buf.substring(begin, idx);
 
@@ -505,7 +479,7 @@ public class HtmlStreamTokenizer
 			while (end > idx && isSpace(buf.charAt(end)))//remove trailing whitespace
 				end--;
 			//todo: tag.setWhitespaceAtEnd(buf.substring(end, len-1) );
-			if (buf.charAt(end) == C_EMPTY)
+			if (buf.charAt(end) == HtmlUtils.C_EMPTY)
 			{
 				tag.setEmpty(true);
 				end--;
@@ -525,19 +499,19 @@ public class HtmlStreamTokenizer
 			String whitespaceBefore = buf.substring(begin, idx);
 
 			begin = idx;
-			if (buf.charAt(idx) == C_DOUBLEQUOTE) //how often are attribute names quoted??
+			if (buf.charAt(idx) == HtmlUtils.C_DOUBLEQUOTE) //how often are attribute names quoted??
 			{
 				idx++;
-				while (idx < len && buf.charAt(idx) != C_DOUBLEQUOTE)//look for close quote
+				while (idx < len && buf.charAt(idx) != HtmlUtils.C_DOUBLEQUOTE)//look for close quote
 					idx++;
 				if (idx == len)
 					continue;	// bad name
 				idx++;
 			}
-			else if (buf.charAt(idx) == C_SINGLEQUOTE) //how often are attribute names quoted??
+			else if (buf.charAt(idx) == HtmlUtils.C_SINGLEQUOTE) //how often are attribute names quoted??
 			{
 				idx++;
-				while (idx < len && buf.charAt(idx) != C_SINGLEQUOTE)//look for close quote
+				while (idx < len && buf.charAt(idx) != HtmlUtils.C_SINGLEQUOTE)//look for close quote
 					idx++;
 				if (idx == len)
 					continue;	// bad name
@@ -589,27 +563,27 @@ public class HtmlStreamTokenizer
 			}
 
 			char quote = buf.charAt(idx);
-			int includeQuote = (quote == C_DOUBLEQUOTE || quote == C_SINGLEQUOTE) ? 1 : 0;
+			int includeQuote = (quote == HtmlUtils.C_DOUBLEQUOTE || quote == HtmlUtils.C_SINGLEQUOTE) ? 1 : 0;
 			String whitespaceAfter = buf.substring(begin, idx + includeQuote);
 
 			begin = idx;
 			int end = begin;
-			if (quote == C_DOUBLEQUOTE)
+			if (quote == HtmlUtils.C_DOUBLEQUOTE)
 			{
 				idx++;
 				begin = idx;
-				while (idx < len && buf.charAt(idx) != C_DOUBLEQUOTE)
+				while (idx < len && buf.charAt(idx) != HtmlUtils.C_DOUBLEQUOTE)
 					idx++;
 				if (idx == len)
 					continue;	// bad value
 				end = idx;
 				idx++;
 			}
-			else if (quote == C_SINGLEQUOTE)
+			else if (quote == HtmlUtils.C_SINGLEQUOTE)
 			{
 				idx++;
 				begin = idx;
-				while (idx < len && buf.charAt(idx) != C_SINGLEQUOTE)
+				while (idx < len && buf.charAt(idx) != HtmlUtils.C_SINGLEQUOTE)
 					idx++;
 				if (idx == len)
 					continue;	// bad value
@@ -718,7 +692,7 @@ public class HtmlStreamTokenizer
 
     static boolean isSpace(int c)
     {
-         return c >=0 && c < CTYPE_LEN ? (m_ctype[c] & CT_WHITESPACE) != 0: false;
+         return c >=0 && c < HtmlUtils.CTYPE_LEN ? (HtmlUtils.m_ctype[c] & HtmlUtils.CT_WHITESPACE) != 0: false;
     }
 
     static boolean isPunct(char c)

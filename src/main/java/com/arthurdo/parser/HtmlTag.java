@@ -229,7 +229,7 @@ public class HtmlTag
 
 		tag.append('<');
 		if (isEndTag())
-			tag.append(HtmlStreamTokenizer.C_ENDTAG);
+			tag.append(HtmlUtils.C_ENDTAG);
 		tag.append(getTagString());
 
 		final int size = m_names.size();

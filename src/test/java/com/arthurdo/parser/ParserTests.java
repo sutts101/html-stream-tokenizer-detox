@@ -26,7 +26,7 @@ public class ParserTests {
     }
 
     @Test
-    public void shouldHandleNonXmlNesting() {
+    public void shouldHandleUnstructuredNesting() {
         String html = "<b><i>Hallo world</b></i>";
         List<Token> tokens = parse(html);
         assertEquals(5, tokens.size());
