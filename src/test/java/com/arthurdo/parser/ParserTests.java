@@ -52,6 +52,30 @@ public class ParserTests {
     }
 
     @Test
+    public void shouldHandleParams_Unquoted() {
+        Token token = parseAndReturnOneToken("<img src=x width=100 height=100/>", 0);
+        expectElementToken(token, "<img src=\"x\" width=\"100\" height=\"100\" />", Valid.Yes, Empty.Yes);
+    }
+
+    @Test
+    public void shouldHandleParams_DoubleQuoted() {
+        Token token = parseAndReturnOneToken("<img src=\"x\" width=\"100\" height=\"100\"/>", 0);
+        expectElementToken(token, "<img src=\"x\" width=\"100\" height=\"100\" />", Valid.Yes, Empty.Yes);
+    }
+
+    @Test
+    public void shouldHandleParams_SingleQuoted() {
+        Token token = parseAndReturnOneToken("<img src='x' width='100' height='100'/>", 0);
+        expectElementToken(token, "<img src=\"x\" width=\"100\" height=\"100\" />", Valid.Yes, Empty.Yes);
+    }
+
+    @Test
+    public void shouldHandleParams_MixOfUnquotedAndSingleAndDoubleQuoted() {
+        Token token = parseAndReturnOneToken("<img src='x' width=\"100\" height=100/>", 0);
+        expectElementToken(token, "<img src=\"x\" width=\"100\" height=\"100\" />", Valid.Yes, Empty.Yes);
+    }
+
+    @Test
     public void shouldHandleEmptyImageByClaimingNotEmpty() {
         Token token = parseAndReturnOneToken("<img>", 0);
         expectElementToken(token, "<img>", Valid.Yes, Empty.No);
