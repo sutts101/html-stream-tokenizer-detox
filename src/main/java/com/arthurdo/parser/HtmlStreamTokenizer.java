@@ -21,61 +21,20 @@ package com.arthurdo.parser;
 
 import java.io.*;
 
-/**
- * <p>HtmlStreamTokenizer is an HTML parser that is similar
- * to the StreamTokenizer class but is specialized for
- * HTML streams. This class is useful when you need to
- * parse the structure of an HTML document.</p>
- *
- * <pre>
- * import com.arthurdo.parser.*;
- * <p>
- * HtmlStreamTokenizer tok = new HtmlStreamTokenizer(inputstream);
- * HtmlTag tag = new HtmlTag();
- *
- * while (tok.nextToken() != HtmlStreamTokenizer.TT_EOF) {
- *	int ttype = tok.getTokenType();
- *
- *	if (ttype == HtmlStreamTokenizer.TT_TAG) {
- *		tok.parseTag(tok.getStringValue(), tag);
- *		System.out.println(&quot;tag: &quot; + tag.toString());
- *	}
- *	else if (ttype == HtmlStreamTokenizer.TT_TEXT) {
- *		System.out.println(&quot;text: &quot; + tok.getStringValue());
- *	}
- *	else if (ttype == HtmlStreamTokenizer.TT_COMMENT) {
- *		System.out.println(&quot;comment: &lt;!--&quot; + tok.getStringValue() + &quot;--&gt;&quot;);
- *	}
- * }
- * </pre>
- *
- * <p>One of the motivations for designing <i>parseTag()</i> to take
- * an HtmlTag argument rather than having <i>parseTag()</i> return
- * a newly created HtmlTag is so you can create your own tag class
- * derived from HtmlTag.
- *
- * <ul>
- * <li> 02/09/98 Thomas Horster-M�ller, fixed bug with counting
- * newlines twice on character pushback.
- * <li> 06/14/99 text is now returned as 'runs' instead of being
- * broken up into words as in previous versions. You can use a StringTokenizer
- * to break your text into words.
- * </ul>
- *
- * @version 2.01 09/12/97
- * @author Arthur Do <arthur@cs.stanford.edu>
- * @see     com.arthurdo.parser.HtmlTag
- * @see     com.arthurdo.parser.Table
- */
 public class HtmlStreamTokenizer
 {
+    private Reader m_in;
+    private boolean m_unescape = false;
+    private boolean m_getEntities = false;
 
+    private int m_state = STATE_TEXT;
     private int m_ttype;
-	private StringBuffer m_buf = new StringBuffer(128);
-	private StringBuffer m_whitespace = new StringBuffer();
 	private int m_pushback = 0;
 	private int m_lineno = 1;
 	private int m_comment = 0;
+    private int m_tagquote;
+    private StringBuffer m_buf = new StringBuffer(128);
+    private StringBuffer m_whitespace = new StringBuffer();
 
 	private char[] m_cdata_end = null;
 	private int m_cdata = -1;
@@ -92,58 +51,12 @@ public class HtmlStreamTokenizer
 	private static final int STATE_BANGTAG = -7;
 	private static final int STATE_ENTITYREF = -8;
 
-	private int m_state = STATE_TEXT;
-
-    private int m_tagquote;
-
-	//private InputStream m_in;
-	private Reader m_in; //input reader appears to be an order of magnitude slower than inputstream!
-
-    private boolean m_unescape = false;
-	private boolean m_getEntities = false; //return TT_ENTITYREFERENCE
-
-
-	/**
-	 * end of stream.
-	 */
-    public static final int TT_EOF = -1;
-	/**
-	 * text token.
-	 */
-    public static final int TT_TEXT = -2;
-	/**
-	 * tag token.
-	 */
-    public static final int TT_TAG = -3;
-	/**
-	 * comment token.
-	 */
-	public static final int TT_COMMENT = -4;
-
-	/**
-	 * inside <! to provide support for doctypes with internal dtd, <![CDATA sections, and degenerate html comments
-	 */
-	public static final int TT_BANGTAG = -5;
-
-	/**
-	 * entity reference token (&*;)
-	 */
-	public static final int TT_ENTITYREFERENCE = -6;
-
-	/**
-	 * @deprecated	use HtmlStreamTokenizer(Reader) instead.
-	 *				This version of the constructor can lead to 10x slower code
-	 *				because of the InputStreamReader wrapper.
-	 * @param	in  input stream
-	 */
-	public HtmlStreamTokenizer(InputStream in)
+	@Deprecated
+    public HtmlStreamTokenizer(InputStream in)
 	{
 		this(new BufferedReader(new InputStreamReader(in)));
 	}
 
-	/**
-	 * @param	in  Reader. The input is assumed to be buffered as needed.
-	 */
 	public HtmlStreamTokenizer(Reader in)
 	{
 		m_in = in;
@@ -160,10 +73,6 @@ public class HtmlStreamTokenizer
         m_unescape = unescape;
     }
 
-	/**
-	 * @return	the next token
-     * @exception  IOException  if error reading input stream.
-	 */
 	public int nextToken()
 		throws IOException
 	{
@@ -457,30 +366,17 @@ public class HtmlStreamTokenizer
         }
     }
 
-    /**
-     * @deprecated	white space is now returned as TT_TEXT. This buffer is always
-     *				empty.
-     * @return	any white space accumulated since last call to nextToken
-     */
+    @Deprecated
     public final StringBuffer getWhiteSpace()
     {
         return m_whitespace;
     }
 
-    /**
-     * @return	current line number. Every time nextToken() sees a new
-     *			line character ('\n'), it increments the line number.
-     */
     public int getLineNumber()
     {
         return m_lineno;
     }
 
-    /**
-    * @param exitString CDATA mode will terminate when it encounters this string
-     * @param pushbackExitString whether to parse the exit string again or not
-     * it'd be an error to call enterCDATAMode(exitString, true); getToken()==TT_CDATA; enterCDATAMode(differentExitString, true); 'cause the next getToken() call will parse differentExitString instead of exitString
-    */
     public void enterCDATAMode(char[] exitString, boolean pushbackExitString)
     {
         m_cdata_end = exitString;
@@ -488,9 +384,10 @@ public class HtmlStreamTokenizer
         m_cdata_pushback = pushbackExitString;
     }
 
-    public boolean isCDATA() { return m_isCDTATA; }
-
-
+    public boolean isCDATA()
+    {
+        return m_isCDTATA;
+    }
 
     public void parseTag(StringBuffer sbuf, HtmlTag tag) throws HtmlException
     {
@@ -506,6 +403,33 @@ public class HtmlStreamTokenizer
     {
         HtmlEscaping.unescape(buf);
     }
+
+    /**
+     * end of stream.
+     */
+    public static final int TT_EOF = -1;
+    /**
+     * text token.
+     */
+    public static final int TT_TEXT = -2;
+    /**
+     * tag token.
+     */
+    public static final int TT_TAG = -3;
+    /**
+     * comment token.
+     */
+    public static final int TT_COMMENT = -4;
+
+    /**
+     * inside <! to provide support for doctypes with internal dtd, <![CDATA sections, and degenerate html comments
+     */
+    public static final int TT_BANGTAG = -5;
+
+    /**
+     * entity reference token (&*;)
+     */
+    public static final int TT_ENTITYREFERENCE = -6;
 
 }
 
