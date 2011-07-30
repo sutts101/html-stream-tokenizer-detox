@@ -2,8 +2,8 @@ package com.arthurdo.parser;
 
 import java.util.Hashtable;
 
-import static com.arthurdo.parser.HtmlStreamTokenizer.isPunct;
-import static com.arthurdo.parser.HtmlStreamTokenizer.isSpace;
+import static com.arthurdo.parser.HtmlUtils.isPunct;
+import static com.arthurdo.parser.HtmlUtils.isSpace;
 
 public class HtmlEscaping {
 

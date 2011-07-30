@@ -29,5 +29,14 @@ public class HtmlUtils {
             m_ctype[i] = CT_WHITESPACE;
 
     }
-    
+
+    static boolean isSpace(int c)
+    {
+         return c >=0 && c < CTYPE_LEN ? (m_ctype[c] & CT_WHITESPACE) != 0: false;
+    }
+
+    static boolean isPunct(char c)
+    {
+        return !Character.isLetterOrDigit(c);
+    }
 }
