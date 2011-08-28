@@ -391,7 +391,7 @@ public class HtmlStreamTokenizer
 
     public void parseTag(StringBuffer sbuf, HtmlTag tag) throws HtmlException
     {
-        HtmlTagParser.parseTag(sbuf, tag, m_unescape);
+        new HtmlTagParser().parseTag(sbuf, tag, m_unescape);
     }
 
     public static String unescape(String buf)

@@ -2,7 +2,7 @@ package com.arthurdo.parser;
 
 public class HtmlTagParser {
 
-    static void parseTag(StringBuffer sbuf, HtmlTag tag, boolean unescape) throws HtmlException
+    void parseTag(StringBuffer sbuf, HtmlTag tag, boolean unescape) throws HtmlException
     {
         tag.reset();
 
@@ -38,7 +38,7 @@ public class HtmlTagParser {
         parseParams(tag, buf, idx, unescape);
     }
 
-    static private void parseParams(HtmlTag tag, String buf, int idx, boolean unescape)
+    private void parseParams(HtmlTag tag, String buf, int idx, boolean unescape)
         throws HtmlException
     {
         int len = buf.length();
