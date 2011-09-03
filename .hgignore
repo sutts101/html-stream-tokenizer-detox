@@ -1,0 +1,11 @@
+syntax: glob
+
+*~
+.\#*
+**.class
+**.idea**
+.DS_Store
+
+build/**
+.gradle/**
+out/**

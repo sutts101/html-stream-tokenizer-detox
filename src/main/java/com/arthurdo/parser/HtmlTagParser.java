@@ -2,40 +2,55 @@ package com.arthurdo.parser;
 
 public class HtmlTagParser {
 
-    void parseTag(StringBuffer sbuf, HtmlTag tag, boolean unescape) throws HtmlException
+    void parseTag(String buf, HtmlTag tag, boolean unescape) throws HtmlException
     {
         tag.reset();
+        int cursor = advanceTillNotSpace(buf, 0);
+        complainIfNoMoreChars(buf, cursor);
+        cursor = advanceIfForwardSlashInWhichCaseMarkAsEndTag(buf, tag, cursor);
+        complainIfNoMoreChars(buf, cursor);
+        int cursor1 = cursor;
+        int cursor2 = advanceTillSpaceOrForwardSlash(buf, cursor);
+        tag.setTag(buf.substring(cursor1, cursor2));
+        parseParams(tag, buf, cursor2, unescape);
+    }
 
-        String buf = sbuf.toString();
-        int len = buf.length();
-        int idx = 0;
-        int begin = 0;
-
-        // parse tag
-        while (idx < len && HtmlUtils.isSpace(buf.charAt(idx)))
+    private int advanceTillNotSpace(String buf, int idx) {
+        while (idx < buf.length() && HtmlUtils.isSpace(buf.charAt(idx)))
             idx++;
+        return idx;
+    }
 
-        if (idx == len)
-            throw new HtmlException("parse empty tag");
+    private int advanceTillSpaceOrForwardSlash(String buf, int idx) {
+        while (idx < buf.length() && !HtmlUtils.isSpace(buf.charAt(idx)) && buf.charAt(idx) != HtmlUtils.C_EMPTY)
+            idx++;
+        return idx;
+    }
 
+    private boolean isSpaceOrSuchlike(char c, char... udders) {
+        if (HtmlUtils.isSpace(c)) {
+            return true;
+        }
+        for (char udder : udders) {
+            if (udder == c) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private int advanceIfForwardSlashInWhichCaseMarkAsEndTag(String buf, HtmlTag tag, int idx) {
         if (buf.charAt(idx) == HtmlUtils.C_ENDTAG)
         {
             tag.setEndTag(true);
             idx++;
         }
+        return idx;
+    }
 
-        if (idx == len)
+    private void complainIfNoMoreChars(String buf, int idx) throws HtmlException {
+        if (idx == buf.length())
             throw new HtmlException("parse empty tag");
-
-        begin = idx;
-        // deal with empty tags like <img/>
-        while (idx < len && !HtmlUtils.isSpace(buf.charAt(idx)) && buf.charAt(idx) != HtmlUtils.C_EMPTY)
-            idx++;
-        String token = buf.substring(begin, idx);
-
-        tag.setTag(token);
-
-        parseParams(tag, buf, idx, unescape);
     }
 
     private void parseParams(HtmlTag tag, String buf, int idx, boolean unescape)
