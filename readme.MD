@@ -13,3 +13,6 @@ So for this I grabbed a (not very good) real world code base - an inherently dub
 and set about tidying it up. Demo'd the approach realtime as part of the talk, along with jumping backwards and forwards through the commit history. 
 
 *See also*: [5-minute intro slideware](https://docs.google.com/presentation/d/1b_TTgjT_09iLGpkFTEdeT3DY_uT_iov9Ys0ZLl-wwNw/pub?start=false&loop=false&delayms=3000)
+
+** Update Jan 2017
+Ported to github
